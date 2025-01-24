@@ -6,21 +6,22 @@
 using namespace CryptoPP;
 const int KEY_BYTE_SIZE = 32;
 const int IV_SIZE = 16;
-void AES256_Encrypt(const std::string& plainText, std::string& cipherText, const byte key[32], const byte iv[16]) {
-
+void AES256_Encrypt(const CryptoPP::byte* plainText, CryptoPP::byte* cipherText, int lengthIn, int lengthOut, const CryptoPP::byte key[32], const CryptoPP::byte iv[16])
+{
   std::string encodedKey, encodedIV, encodedTag;
 
   // Encryption
   try {
     GCM<AES>::Encryption enCRYPTOR256;
     enCRYPTOR256.SetKeyWithIV(key, KEY_BYTE_SIZE, iv, IV_SIZE);
+    ArraySink encryptedTextSink(cipherText, lengthOut);
 
     AuthenticatedEncryptionFilter encryptionFilter(
       enCRYPTOR256,
-      new StringSink(cipherText), false, 16 // 16-byte (128-bit) authentication tag
+      &encryptedTextSink, false, 16 // 16-byte (128-bit) authentication tag
     );
 
-    encryptionFilter.ChannelPut(DEFAULT_CHANNEL, (byte *)plainText.c_str(), plainText.size());
+    encryptionFilter.ChannelPut(DEFAULT_CHANNEL, plainText, lengthIn);
     encryptionFilter.ChannelMessageEnd(DEFAULT_CHANNEL);
 
     // Authentication tag
@@ -51,23 +52,24 @@ void AES256_Encrypt(const std::string& plainText, std::string& cipherText, const
   }
 }
 
-void AES256_Decrypt(const std::string& cipherText, std::string& decryptedText, const byte key[32], const byte iv[16]) {
-
+void AES256_Decrypt(const CryptoPP::byte* cipherText, CryptoPP::byte* recoveredText, int lengthIn, int lengthOut, const CryptoPP::byte key[32], const CryptoPP::byte iv[16])
+{
  // std::string decryptedText;
 
   try {
+    std::vector<byte> decrypted;
+    decrypted.resize(lengthIn);
     GCM<AES>::Decryption deCRYPTOR256;
     deCRYPTOR256.SetKeyWithIV(key, KEY_BYTE_SIZE, iv, IV_SIZE);
-
+    ArraySink plaintextSink(decrypted.data(), decrypted.size());
     AuthenticatedDecryptionFilter decryptionFilter(
-      deCRYPTOR256,
-      new StringSink(decryptedText), AuthenticatedDecryptionFilter::THROW_EXCEPTION, 16
+      deCRYPTOR256, &plaintextSink,  AuthenticatedDecryptionFilter::THROW_EXCEPTION, 16
     );
 
-    decryptionFilter.ChannelPut(DEFAULT_CHANNEL, reinterpret_cast<const byte*>(cipherText.c_str()), cipherText.size());
+    decryptionFilter.ChannelPut(DEFAULT_CHANNEL, cipherText, lengthIn);
     decryptionFilter.ChannelMessageEnd(DEFAULT_CHANNEL);
 
-    std::cout << "Decrypted text: " << decryptedText << std::endl;
+    std::cout << "Decrypted text: " << decrypted.data() << std::endl;
 
 
   }

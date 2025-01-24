@@ -7,5 +7,5 @@
 #include <modes.h>
 #include <filters.h>
 
-void AES256_Encrypt(const std::string& plainText, std::string& cipherText, const CryptoPP::byte key[32], const CryptoPP::byte iv[16]);
-void AES256_Decrypt(const std::string& cipherText, std::string& recoveredText, const CryptoPP::byte key[32], const CryptoPP::byte iv[16]);
+void AES256_Encrypt(const CryptoPP::byte *plainText, int lengthIn, CryptoPP::byte *cipherText,  int lengthOut, const CryptoPP::byte key[32], const CryptoPP::byte iv[16]);
+void AES256_Decrypt(const CryptoPP::byte *cipherText, int lengthIn, CryptoPP::byte *recoveredText, int lengthOut, const CryptoPP::byte key[32], const CryptoPP::byte iv[16]);
