@@ -21,9 +21,15 @@
     <ClCompile Include="cryptoc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="hexUtil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cryptoc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hexUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

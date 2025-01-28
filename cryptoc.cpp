@@ -2,6 +2,7 @@
 #include "files.h"
 #include "hex.h"
 #include "gcm.h"
+#include "hexUtil.h"
 
 using namespace CryptoPP;
 const int KEY_BYTE_SIZE = 32;
@@ -75,6 +76,22 @@ void AES256_Decrypt(const std::string& cipherText, std::string& decryptedText, c
     std::cerr << "Decryption error: " << e.what() << std::endl;
 
   }
-
 }
 
+
+void aES256Encrypt(const byte* buffer, int lenIn, byte*cipherOut, int& lenInOut, const byte key[32], const byte iv[16])
+{
+  std::string hexTemp = BinaryArrayToHex(buffer, lenIn);
+  std::string cipherText;
+  AES256_Encrypt(hexTemp, cipherText, key, iv);
+  lenInOut = std::min((int)cipherText.length(), lenInOut);
+  std::memcpy(cipherOut, cipherText.data(), lenInOut);
+}
+
+void aES256Decrypt(const byte* cipherBuff, int lenIn, byte* resultBuff, int& lenInOut, const byte key[32], const byte iv[16])
+{
+  std::string cipherText(reinterpret_cast<const char*>(cipherBuff), lenIn);
+  std::string decryptedText;
+  AES256_Decrypt(cipherText, decryptedText, key, iv);
+  HexToBinaryArray(decryptedText, resultBuff, lenInOut);
+}

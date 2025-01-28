@@ -145,10 +145,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="cryptoc.cpp" />
+    <ClCompile Include="hexUtil.cpp" />
     <ClCompile Include="testAes256.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cryptoc.h" />
+    <ClInclude Include="hexUtil.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
