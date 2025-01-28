@@ -93,5 +93,5 @@ void aES256Decrypt(const byte* cipherBuff, int lenIn, byte* resultBuff, int& len
   std::string cipherText(reinterpret_cast<const char*>(cipherBuff), lenIn);
   std::string decryptedText;
   AES256_Decrypt(cipherText, decryptedText, key, iv);
-  HexToBinaryArray(decryptedText, resultBuff, lenInOut);
+  lenInOut = HexToBinaryArray(decryptedText, resultBuff, lenInOut);
 }

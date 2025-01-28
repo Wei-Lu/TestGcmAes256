@@ -11,7 +11,7 @@ std::string BinaryArrayToHex(const CryptoPP::byte* binary, size_t length) {
   return oss.str();
 }
 
-void HexToBinaryArray(const std::string& hex, CryptoPP::byte* binary, size_t maxLength) {
+int HexToBinaryArray(const std::string& hex, CryptoPP::byte* binary, size_t maxLength) {
   if (hex.size() % 2 != 0) {
     throw std::invalid_argument("Hex string must have an even number of characters");
   }
@@ -23,6 +23,7 @@ void HexToBinaryArray(const std::string& hex, CryptoPP::byte* binary, size_t max
     std::string byteString = hex.substr(i, 2);
     binary[i / 2] = static_cast<CryptoPP::byte>(std::stoi(byteString, nullptr, 16));
   }
+  return hex.size() / 2;
 }
 
 
