@@ -6,7 +6,7 @@
 using namespace CryptoPP;
 const int KEY_BYTE_SIZE = 32;
 const int IV_SIZE = 16;
-void AES256_Encrypt(const CryptoPP::byte* plainText, CryptoPP::byte* cipherText, int lengthIn, int lengthOut, const CryptoPP::byte key[32], const CryptoPP::byte iv[16])
+void AES256_Encrypt(const byte* plainText, int lengthIn, byte* cipherText, int lengthOut, const byte key[32], const byte iv[16], SecByteBlock &tag)
 {
   std::string encodedKey, encodedIV, encodedTag;
 
@@ -25,8 +25,8 @@ void AES256_Encrypt(const CryptoPP::byte* plainText, CryptoPP::byte* cipherText,
     encryptionFilter.ChannelMessageEnd(DEFAULT_CHANNEL);
 
     // Authentication tag
-    const int TAG_SIZE = 16;
-    SecByteBlock tag(TAG_SIZE); // Replace TAG_SIZE with the tag size used (e.g., 16 bytes for AES-GCM)
+ //   const int TAG_SIZE = 16;
+ //   SecByteBlock tag(TAG_SIZE); // Replace TAG_SIZE with the tag size used (e.g., 16 bytes for AES-GCM)
 
 // Retrieve the tag
     encryptionFilter.Get(tag, tag.size());
@@ -52,7 +52,7 @@ void AES256_Encrypt(const CryptoPP::byte* plainText, CryptoPP::byte* cipherText,
   }
 }
 
-void AES256_Decrypt(const CryptoPP::byte* cipherText, CryptoPP::byte* recoveredText, int lengthIn, int lengthOut, const CryptoPP::byte key[32], const CryptoPP::byte iv[16])
+void AES256_Decrypt(const byte* cipherText, int lengthIn, byte* recoveredText, int lengthOut, const byte key[32], const byte iv[16], const SecByteBlock& tag)
 {
  // std::string decryptedText;
 
