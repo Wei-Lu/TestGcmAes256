@@ -52,7 +52,7 @@ int main() {
     GCM<AES>::Encryption encryptor;
     encryptor.SetKeyWithIV(key.data(), key.size(), iv.data(), iv.size());
 
-    AuthenticatedEncryptionFilter ef(encryptor, new ArraySink(ciphertext.data(), ciphertext.size()), false, tag.size());
+    AuthenticatedEncryptionFilter ef(encryptor, new VectorSink(ciphertext), false, tag.size());
 
     // Add AAD
     ef.ChannelPut(DEFAULT_CHANNEL, aad.data(), aad.size());
@@ -63,13 +63,15 @@ int main() {
     // Finalize encryption
     ef.ChannelMessageEnd(DEFAULT_CHANNEL);
 
-    // Get the tag
-    int tagLen = ef.Get(tag.data(), tag.size());
-    if (tagLen == 0)
-    {
-      printf("tag error");
+    if (ef.MaxRetrievable() == 0) {
+      std::cerr << "Error: No data in filter!" << std::endl;
       return -1;
     }
+
+
+    // Get the tag
+    int tagLen = ef.Get(tag.data(), tag.size());
+
 
     // Print ciphertext and tag
     printHex("Ciphertext", ciphertext);
@@ -80,7 +82,7 @@ int main() {
     decryptor.SetKeyWithIV(key.data(), key.size(), iv.data(), iv.size());
 
     std::vector<byte> decryptedtext(plaintext.size());
-    AuthenticatedDecryptionFilter df(decryptor, new ArraySink(decryptedtext.data(), decryptedtext.size()), AuthenticatedDecryptionFilter::DEFAULT_FLAGS, tag.size());
+    AuthenticatedDecryptionFilter df(decryptor, new VectorSink(decryptedtext), AuthenticatedDecryptionFilter::DEFAULT_FLAGS, tag.size());
 
     // Add AAD
     df.ChannelPut(DEFAULT_CHANNEL, aad.data(), aad.size());
@@ -93,6 +95,11 @@ int main() {
 
     // Finalize decryption
     df.ChannelMessageEnd(DEFAULT_CHANNEL);
+    if (df.MaxRetrievable() == 0) {
+      std::cerr << "Error: No data in filter 2!" << std::endl;
+      return -1;
+    }
+
 
     // Convert decrypted text to string
     std::string decryptedStr(decryptedtext.begin(), decryptedtext.end());
