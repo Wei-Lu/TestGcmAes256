@@ -6,8 +6,9 @@
 #include <aes.h>
 #include <modes.h>
 #include <filters.h>
-
-//void AES256_Encrypt(const std::string& plainText, std::string& cipherText, const CryptoPP::byte key[32], const CryptoPP::byte iv[16]);
-//void AES256_Decrypt(const std::string& cipherText, std::string& recoveredText, const CryptoPP::byte key[32], const CryptoPP::byte iv[16]);
-void aES256Encrypt(const CryptoPP::byte* buffer, int lenIn, CryptoPP::byte* cipherText, int& lenInOut, const CryptoPP::byte key[32], const CryptoPP::byte iv[16]);
-void aES256Decrypt(const CryptoPP::byte* cipherText, int lenIn, CryptoPP::byte* resultText, int& lenInOut, const CryptoPP::byte key[32], const CryptoPP::byte iv[16]);
+const int KEY_BYTE_SIZE = 32;
+const int IV_BYTE_SIZE = 16;
+void aES256EncryptString(const std::string& plainText, std::string& cipherText, const CryptoPP::byte key[KEY_BYTE_SIZE], const CryptoPP::byte iv[IV_BYTE_SIZE]);
+void aES256DecryptString(const std::string& cipherText, std::string& recoveredText, const CryptoPP::byte key[KEY_BYTE_SIZE], const CryptoPP::byte iv[IV_BYTE_SIZE]);
+void aES256Encrypt(const CryptoPP::byte* buffer, int lenIn, CryptoPP::byte* cipherText, int& lenInOut, const CryptoPP::byte key[KEY_BYTE_SIZE], const CryptoPP::byte iv[IV_BYTE_SIZE]);
+void aES256Decrypt(const CryptoPP::byte* cipherText, int lenIn, CryptoPP::byte* resultText, int& lenInOut, const CryptoPP::byte key[KEY_BYTE_SIZE], const CryptoPP::byte iv[IV_BYTE_SIZE]);
