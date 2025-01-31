@@ -8,6 +8,5 @@
 #include <filters.h>
 
 using namespace CryptoPP;
-
-void AES256_Encrypt(const byte *plainText, int lengthIn, byte *cipherText,  int lengthOut, const byte key[32], const byte iv[16], SecByteBlock& tag);
-void AES256_Decrypt(const byte *cipherText, int lengthIn, byte *recoveredText, int lengthOut, const byte key[32], const byte iv[16], const SecByteBlock& tag);
+int aes256Encrypt(const byte* plainText, int lenIn, byte* encriptBuffer, int& lenInOut, const byte key[32], const byte iv[16]);
+int aes256Decrypt(const byte* encryptBuffer, int lenIn, byte* decryptedBuff, int& lenInOut, const byte key[32], const byte iv[16]);
