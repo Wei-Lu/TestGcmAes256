@@ -1,6 +1,160 @@
 // testAes256.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
+#include <iostream>
+#include <cryptlib.h>
+#include <aes.h>
+#include <gcm.h>
+#include <filters.h>
+#include <hex.h>
+#include <files.h>
+
+using namespace CryptoPP;
+using namespace std;
+
+#if 0
+void EncryptAES_GCM(const std::string& keyHex, const std::string& ivHex,
+  const std::string& plaintext, std::string& cipherText) {
+  // Convert hex strings to binary
+  SecByteBlock key(AES::DEFAULT_KEYLENGTH);
+  StringSource(keyHex, true, new HexDecoder(new ArraySink(key, key.size())));
+
+  SecByteBlock iv(AES::BLOCKSIZE);
+  StringSource(ivHex, true, new HexDecoder(new ArraySink(iv, iv.size())));
+
+  GCM<AES>::Encryption encryption;
+  encryption.SetKeyWithIV(key, key.size(), iv, iv.size());
+
+  std::string cipherWithTag;
+  AuthenticatedEncryptionFilter encryptionFilter(encryption,
+    new StringSink(cipherWithTag),
+    false,  // No AAD
+    16      // Tag size (default: 16 bytes)
+  );
+
+  encryptionFilter.Put((const byte*)plaintext.data(), plaintext.size());
+  encryptionFilter.MessageEnd();
+
+  cipherText = cipherWithTag;  // Includes both ciphertext and tag
+
+  std::cout << "Ciphertext (Hex): ";
+  StringSource(cipherText, true, new HexEncoder(new FileSink(std::cout)));
+  std::cout << std::endl;
+}
+
+void DecryptAES_GCM(const std::string& keyHex, const std::string& ivHex,
+  const std::string& cipherText, std::string& decryptedText) {
+  SecByteBlock key(AES::DEFAULT_KEYLENGTH);
+  StringSource(keyHex, true, new HexDecoder(new ArraySink(key, key.size())));
+
+  SecByteBlock iv(AES::BLOCKSIZE);
+  StringSource(ivHex, true, new HexDecoder(new ArraySink(iv, iv.size())));
+
+  GCM<AES>::Decryption decryption;
+  decryption.SetKeyWithIV(key, key.size(), iv, iv.size());
+
+  try {
+    AuthenticatedDecryptionFilter decryptionFilter(decryption,
+      new StringSink(decryptedText),
+      AuthenticatedDecryptionFilter::MAC_AT_END,  // Expect tag at end
+      16  // Tag size
+    );
+
+    decryptionFilter.Put((const byte*)cipherText.data(), cipherText.size());
+    decryptionFilter.MessageEnd();
+
+    std::cout << "Decrypted Text: " << decryptedText << std::endl;
+  }
+  catch (const Exception& ex) {
+    std::cerr << "Decryption failed: " << ex.what() << std::endl;
+  }
+}
+#endif
+
+
+int EncryptAES_GCM(const std::string& keyHex, const std::string& ivHex,
+  const byte * plaintext, int lenIn,  byte * cipherText, int &lenInOut) {
+  // Convert hex strings to binary
+  //SecByteBlock key(AES::DEFAULT_KEYLENGTH);
+  SecByteBlock key(32);
+  StringSource(keyHex, true, new HexDecoder(new ArraySink(key, key.size())));
+
+  SecByteBlock iv(AES::BLOCKSIZE);
+  StringSource(ivHex, true, new HexDecoder(new ArraySink(iv, iv.size())));
+
+  GCM<AES>::Encryption encryption;
+  encryption.SetKeyWithIV(key, key.size(), iv, iv.size());
+
+  std::string cipherWithTag;
+  AuthenticatedEncryptionFilter encryptionFilter(encryption,
+    new StringSink(cipherWithTag),
+    false,  // No AAD
+    16      // Tag size (default: 16 bytes)
+  );
+
+  encryptionFilter.Put(plaintext, lenIn);
+  encryptionFilter.MessageEnd();
+
+  memcpy(cipherText, cipherWithTag.data(), cipherWithTag.size());  // Includes both ciphertext and tag
+
+  std::cout << "Ciphertext (Hex): ";
+  StringSource(cipherWithTag, true, new HexEncoder(new FileSink(std::cout)));
+  std::cout << std::endl;
+  lenInOut = cipherWithTag.size();
+  return 0;
+}
+
+void DecryptAES_GCM(const std::string& keyHex, const std::string& ivHex,
+  const byte *cipherText, int lenIn,   byte * decryptedBuff, int &lenInOut) {
+  SecByteBlock key(32);
+  //SecByteBlock key(AES::DEFAULT_KEYLENGTH);
+  StringSource(keyHex, true, new HexDecoder(new ArraySink(key, key.size())));
+
+  SecByteBlock iv(AES::BLOCKSIZE);
+  StringSource(ivHex, true, new HexDecoder(new ArraySink(iv, iv.size())));
+
+  GCM<AES>::Decryption decryption;
+  decryption.SetKeyWithIV(key, key.size(), iv, iv.size());
+  string decryptedText;
+  try {
+    AuthenticatedDecryptionFilter decryptionFilter(decryption,
+      new StringSink(decryptedText),
+      AuthenticatedDecryptionFilter::MAC_AT_END,  // Expect tag at end
+      16  // Tag size
+    );
+
+    decryptionFilter.Put(cipherText, lenIn);
+    decryptionFilter.MessageEnd();
+
+    memcpy(decryptedBuff, decryptedText.data(), decryptedText.size());
+    lenInOut = decryptedText.size();
+    std::cout << "Decrypted Text: " << decryptedText << std::endl;
+  }
+  catch (const Exception& ex) {
+    std::cerr << "Decryption failed: " << ex.what() << std::endl;
+  }
+}
+int main() {
+  std::string keyHex = "603deb1015ca71be2b73aef0857d7781603deb1015ca71be2b73aef0857d7781";  // 16-byte key
+  std::string ivHex = "000102030405060708090A0B0C0D0E0F";   // 16-byte IV
+  std::string plaintext = "Hello, AES-GCM!";
+ // std::string cipherText, decryptedText;
+  byte cipherText[100], decryptedText[100];
+  int lenInOut = 100;
+  EncryptAES_GCM(keyHex, ivHex, (byte *)plaintext.data(), plaintext.size(), cipherText, lenInOut);
+  int lenOut = 100;
+  DecryptAES_GCM(keyHex, ivHex, cipherText, lenInOut, decryptedText, lenOut);
+
+  byte abc[] = { 1, 5, 0, 8 };
+  lenInOut = 100;
+  EncryptAES_GCM(keyHex, ivHex, abc, sizeof(abc), cipherText, lenInOut);
+  lenOut = 100;
+  DecryptAES_GCM(keyHex, ivHex, cipherText, lenInOut, decryptedText, lenOut);
+  return 0;
+}
+
+
+#if 0
 
 #include <iostream>
 #include <string>
@@ -113,3 +267,4 @@ int main() {
   return 0;
 }
 
+#endif
